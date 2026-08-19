@@ -1,3 +1,4 @@
+import { AuthModule } from '@auth';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from '@shared/infrastructure/prisma';
@@ -11,6 +12,7 @@ import { PrismaModule } from '@shared/infrastructure/prisma';
       isGlobal: true,
     }),
     PrismaModule,
+    AuthModule,
   ],
   controllers: [],
   providers: [],

@@ -14,7 +14,9 @@
     "sourceMap": true,
     "outDir": "./dist",
     "paths": {
-      "@shared/*": ["./src/shared/*"]
+      "@auth": ["./src/modules/auth"],
+      "@shared/*": ["./src/shared/*"],
+      "@auth/*": ["./src/modules/auth/*"]
     },
     "incremental": true,
     "skipLibCheck": true,

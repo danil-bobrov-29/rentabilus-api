@@ -1,98 +1,316 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Rentabilus API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Backend-приложение Rentabilus, построенное на NestJS в формате модульного монолита.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Технологии
 
-## Description
+- **Node.js** — среда выполнения.
+- **TypeScript** — основной язык разработки.
+- **NestJS 11** — HTTP API, dependency injection и система модулей.
+- **PostgreSQL** — основная реляционная база данных.
+- **Prisma** — описание схемы, миграции и типизированный доступ к данным.
+- **@prisma/adapter-pg** — PostgreSQL driver adapter для Prisma Client.
+- **JWT** — аутентификация запросов с помощью access-токенов.
+- **Argon2id** — хеширование секретов и паролей.
+- **class-validator / class-transformer** — валидация и преобразование DTO.
+- **Swagger/OpenAPI** — документация HTTP API.
+- **Jest** — unit- и e2e-тестирование.
+- **ESLint / Prettier** — статический анализ и форматирование.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Архитектура
 
-## Project setup
+Проект является модульным монолитом: приложение собирается, разворачивается и запускается как единое целое, но бизнес-функциональность разделена на изолированные модули.
 
-```bash
-$ npm install
+```text
+src/
+├── app.module.ts
+├── main.ts
+├── modules/
+│   ├── <module-a>/
+│   ├── <module-b>/
+│   └── <module-c>/
+└── shared/
+    └── infrastructure/
 ```
 
-## Compile and run the project
+`AppModule` является точкой композиции: подключает конфигурацию, общую инфраструктуру и бизнес-модули. Бизнес-логика в нём не размещается.
 
-```bash
-# development
-$ npm run start
+## Структура бизнес-модуля
 
-# watch mode
-$ npm run start:dev
+Каждая бизнес-область располагается в `src/modules/<module>` и оформляется как самостоятельный NestJS-модуль.
 
-# production mode
-$ npm run start:prod
+```text
+src/modules/<module>/
+├── domain/
+│   ├── entities/
+│   ├── repositories/
+│   └── errors/
+├── application/
+│   ├── ports/
+│   └── use-cases/
+├── infrastructure/
+│   ├── persistence/
+│   └── integrations/
+├── presentation/
+│   └── http/
+│       ├── controllers/
+│       ├── decorators/
+│       ├── dto/
+│       ├── guards/
+│       └── types/
+├── <module>.module.ts
+└── index.ts
 ```
 
-## Run tests
+Необязательные директории создаются только при реальной необходимости.
 
-```bash
-# unit tests
-$ npm run test
+### Domain
 
-# e2e tests
-$ npm run test:e2e
+Содержит бизнес-модель модуля:
 
-# test coverage
-$ npm run test:cov
+- сущности и value objects;
+- интерфейсы репозиториев;
+- доменные ошибки;
+- бизнес-инварианты.
+
+Domain не зависит от NestJS, Prisma, HTTP, PostgreSQL и внешних сервисов.
+
+### Application
+
+Содержит сценарии использования приложения:
+
+- команды и запросы;
+- use cases;
+- входные и выходные контракты;
+- порты для внешних механизмов;
+- координацию доменных объектов.
+
+Application зависит от domain, но не от конкретных реализаций базы данных, транспорта или внешних интеграций.
+
+### Infrastructure
+
+Содержит технические реализации контрактов:
+
+- Prisma-репозитории;
+- реализации криптографических сервисов;
+- клиенты внешних API;
+- файловые и сетевые адаптеры;
+- реализацию application-портов.
+
+Зависимость направлена к контракту: infrastructure реализует интерфейс, объявленный в domain или application.
+
+### Presentation
+
+Отвечает за внешний интерфейс приложения:
+
+- HTTP-контроллеры;
+- request и response DTO;
+- валидацию входных данных;
+- guards и decorators;
+- Swagger-описания;
+- преобразование ошибок в HTTP-ответы.
+
+Контроллеры должны вызывать application use cases и не содержать бизнес-логику или Prisma-запросы.
+
+## Направление зависимостей
+
+```text
+presentation ──────► application ──────► domain
+                           ▲
+                           │
+                    infrastructure
 ```
 
-## Deployment
+Основные правила:
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+- domain ни от кого не зависит;
+- application зависит только от domain и собственных портов;
+- infrastructure зависит от контрактов application/domain;
+- presentation обращается к application;
+- конкретные реализации связываются с контрактами в NestJS-модуле через DI.
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## Границы модулей
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+Каждый модуль владеет своей бизнес-логикой и данными. Другие модули не должны импортировать его внутренние use cases, репозитории и infrastructure-классы.
+
+Публичный API объявляется в `index.ts`:
+
+```ts
+export { ExampleModule } from './example.module';
+export { ExamplePublicService } from './application/example-public.service';
+export type { ExampleResult } from './application/example.types';
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Потребитель использует только публичную точку входа:
 
-## Resources
+```ts
+import { ExampleModule, ExamplePublicService } from '@example';
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+Взаимодействие модулей возможно через:
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+- публичные application-сервисы;
+- явно экспортированные DI-токены;
+- события;
+- стабильные входные и выходные контракты.
 
-## Support
+Прямое обращение к таблицам, принадлежащим другому модулю, не допускается.
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## Shared
 
-## Stay in touch
+`src/shared` содержит переиспользуемую техническую инфраструктуру, не связанную с конкретной бизнес-областью.
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Допустимые примеры:
 
-## License
+- подключение к базе данных;
+- логирование;
+- конфигурация;
+- технические HTTP-компоненты;
+- общие утилиты без бизнес-правил.
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+В `shared` нельзя переносить код только потому, что он используется в двух местах. Если код выражает бизнес-понятие, он должен принадлежать соответствующему модулю.
+
+## Prisma и PostgreSQL
+
+Prisma-схема находится в [`prisma/schema.prisma`](prisma/schema.prisma), миграции — в `prisma/migrations`.
+
+Общий `PrismaModule` расположен в `src/shared/infrastructure/prisma` и предоставляет `PrismaService`. Сервис:
+
+- получает настройки подключения через `ConfigService`;
+- создаёт PostgreSQL driver adapter;
+- открывает соединение при старте приложения;
+- закрывает соединение при завершении работы.
+
+`PrismaService` предоставляет только доступ к Prisma Client. Бизнес-запросы размещаются в infrastructure-репозиториях соответствующих модулей.
+
+```text
+Prisma schema
+     │
+     ▼
+Prisma Client
+     │
+     ▼
+module/infrastructure/persistence
+     │
+     ▼
+domain repository interface
+```
+
+Prisma-типы не должны использоваться как доменные сущности или HTTP DTO.
+
+## Алиасы импортов
+
+Алиасы настраиваются в `tsconfig.json` и дублируются в `moduleNameMapper` для Jest.
+
+```text
+@shared/*   → src/shared/*
+@<module>   → src/modules/<module>
+@<module>/* → src/modules/<module>/*
+```
+
+Точный алиас модуля указывает на директорию с `index.ts`, а не на файл `index.ts`. Это необходимо для корректного разрешения скомпилированного `index.js` в Node.js.
+
+Короткие относительные импорты допустимы между соседними файлами. Для переходов между слоями и модулями используются алиасы.
+
+## Конфигурация
+
+Установите зависимости и создайте `.env`:
+
+```bash
+npm install
+cp .env.example .env
+```
+
+Основные переменные окружения:
+
+```env
+HTTP_PORT=3000
+HTTP_HOST="http://localhost:3000"
+GLOBAL_PREFIX="/api"
+
+DATABASE_HOST="localhost"
+DATABASE_PORT=5432
+DATABASE_USER="postgres"
+DATABASE_PASSWORD="postgres"
+DATABASE_NAME="rentabilus"
+DATABASE_SCHEMA="public"
+
+JWT_ACCESS_SECRET="replace-with-long-random-secret"
+JWT_ACCESS_TTL_SECONDS=900
+```
+
+Сгенерировать случайный секрет:
+
+```bash
+openssl rand -base64 48
+```
+
+Файл `.env` и реальные секреты нельзя добавлять в Git.
+
+## Работа с Prisma
+
+```bash
+# генерация Prisma Client
+npx prisma generate
+
+# создание и применение миграции в development
+npx prisma migrate dev
+
+# применение существующих миграций в production
+npx prisma migrate deploy
+
+# форматирование схемы
+npx prisma format
+```
+
+Изменение структуры базы выполняется через новую миграцию. Уже применённые миграции не редактируются.
+
+## Запуск
+
+```bash
+# development с автоматической пересборкой
+npm run start:dev
+
+# обычный запуск
+npm run start
+
+# production
+npm run build
+npm run start:prod
+```
+
+Swagger UI доступен после запуска по адресу:
+
+```text
+http://localhost:3000/docs
+```
+
+## Проверка качества
+
+```bash
+npm run lint          # статический анализ
+npm run format:check  # проверка форматирования
+npm run test          # unit-тесты
+npm run test:e2e      # e2e-тесты
+npm run build         # production-сборка
+npm run check         # полный набор проверок
+```
+
+## Добавление модуля
+
+1. Создайте `src/modules/<module>`.
+2. Определите бизнес-модель и интерфейсы репозиториев в domain.
+3. Реализуйте сценарии и порты в application.
+4. Добавьте реализации репозиториев и интеграций в infrastructure.
+5. Добавьте HTTP-контроллеры и DTO в presentation.
+6. Свяжите реализации с контрактами через DI в `<module>.module.ts`.
+7. Объявите минимальный публичный API в `index.ts`.
+8. Подключите модуль в `AppModule`.
+
+При разработке соблюдайте ограничения:
+
+- контроллер не обращается к Prisma напрямую;
+- use case не импортирует HTTP DTO и infrastructure;
+- модуль не обращается к внутренним компонентам другого модуля;
+- `shared` не содержит бизнес-логику;
+- секреты, пароли и токены не записываются в логи.

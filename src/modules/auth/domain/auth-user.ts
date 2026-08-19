@@ -1,3 +1,11 @@
+export const UserRole = {
+  USER: 'USER',
+  ADMIN: 'ADMIN',
+  SUPER_ADMIN: 'SUPER_ADMIN',
+} as const;
+
+export type UserRole = (typeof UserRole)[keyof typeof UserRole];
+
 export interface AuthUser {
   id: string;
   email: string;
@@ -6,9 +14,10 @@ export interface AuthUser {
   lastName: string;
   middleName: string | null;
   position: string | null;
+  role: UserRole;
 }
 
-export type PublicAuthUser = Omit<AuthUser, 'passwordHash'>;
+export type PublicAuthUser = Omit<AuthUser, 'passwordHash' | 'role'>;
 
 export function toPublicAuthUser(user: AuthUser): PublicAuthUser {
   return {

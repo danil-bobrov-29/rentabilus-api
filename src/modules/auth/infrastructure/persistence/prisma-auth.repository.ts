@@ -1,4 +1,4 @@
-import { AuthUser } from '@auth/domain/auth-user';
+import { AuthUser, UserRole } from '@auth/domain/auth-user';
 import { EmailAlreadyExistsError } from '@auth/domain/auth.errors';
 import { AuthRepository, CreateAuthUser } from '@auth/domain/auth.repository';
 import { Injectable } from '@nestjs/common';
@@ -27,6 +27,7 @@ export class PrismaAuthRepository implements AuthRepository {
       lastName: user.lastName,
       middleName: user.middleName,
       position: user.position,
+      role: user.role,
     };
   }
 
@@ -48,6 +49,7 @@ export class PrismaAuthRepository implements AuthRepository {
       lastName: user.lastName,
       middleName: user.middleName,
       position: user.position,
+      role: user.role,
     };
   }
 
@@ -59,6 +61,7 @@ export class PrismaAuthRepository implements AuthRepository {
           firstName: input.firstName,
           lastName: input.lastName,
           middleName: input.middleName,
+          role: UserRole.USER,
           credential: {
             create: {
               passwordHash: input.passwordHash,
@@ -78,6 +81,7 @@ export class PrismaAuthRepository implements AuthRepository {
         lastName: user.lastName,
         middleName: user.middleName,
         position: user.position,
+        role: user.role,
       };
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {

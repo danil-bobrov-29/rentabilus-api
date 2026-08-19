@@ -42,6 +42,7 @@ export class LoginUseCase {
       accessToken: await this.tokenService.createAccessToken({
         sub: user.id,
         email: user.email,
+        role: user.role,
       }),
     };
   }

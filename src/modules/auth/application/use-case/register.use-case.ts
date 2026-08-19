@@ -65,6 +65,7 @@ export class RegisterUseCase {
     const accessToken = await this.tokenService.createAccessToken({
       sub: user.id,
       email: user.email,
+      role: user.role,
     });
 
     return {

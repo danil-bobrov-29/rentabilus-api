@@ -1,5 +1,6 @@
 import { TOKEN_SERVICE } from '@auth/application/ports/token-service';
 import type { TokenService } from '@auth/application/ports/token-service';
+import { UserRole } from '@auth/domain/auth-user';
 import type { AuthenticatedRequest } from '@auth/presentation/http/types/authenticated-request';
 import {
   CanActivate,
@@ -27,7 +28,12 @@ export class JwtAuthGuard implements CanActivate {
 
     try {
       const payload = await this.tokenService.verifyAccessToken(token);
-      request.user = { id: payload.sub, email: payload.email };
+
+      if (!Object.values(UserRole).includes(payload.role)) {
+        throw new UnauthorizedException();
+      }
+
+      request.user = { id: payload.sub, email: payload.email, role: payload.role };
       return true;
     } catch {
       throw new UnauthorizedException('Недействительный или истёкший токен');

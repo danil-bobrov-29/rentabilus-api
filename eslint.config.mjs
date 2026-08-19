@@ -6,7 +6,13 @@ import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   {
-    ignores: ['coverage/**', 'dist/**', 'eslint.config.mjs', 'prettier.config.mjs'],
+    ignores: [
+      'coverage/**',
+      'dist/**',
+      'src/generated/**',
+      'eslint.config.mjs',
+      'prettier.config.mjs',
+    ],
   },
   eslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,

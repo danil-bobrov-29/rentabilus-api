@@ -15,9 +15,6 @@ export class AuthUserResponseDto {
 
   @ApiPropertyOptional({ example: 'Иванович', nullable: true })
   middleName!: string | null;
-
-  @ApiPropertyOptional({ example: 'Менеджер', nullable: true })
-  position!: string | null;
 }
 
 export class AccessTokenResponseDto {

@@ -13,7 +13,6 @@ export interface AuthUser {
   firstName: string;
   lastName: string;
   middleName: string | null;
-  position: string | null;
   role: UserRole;
 }
 
@@ -26,6 +25,5 @@ export function toPublicAuthUser(user: AuthUser): PublicAuthUser {
     firstName: user.firstName,
     lastName: user.lastName,
     middleName: user.middleName,
-    position: user.position,
   };
 }

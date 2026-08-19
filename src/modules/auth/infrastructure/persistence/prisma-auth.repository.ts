@@ -26,7 +26,6 @@ export class PrismaAuthRepository implements AuthRepository {
       firstName: user.firstName,
       lastName: user.lastName,
       middleName: user.middleName,
-      position: user.position,
       role: user.role,
     };
   }
@@ -48,7 +47,6 @@ export class PrismaAuthRepository implements AuthRepository {
       firstName: user.firstName,
       lastName: user.lastName,
       middleName: user.middleName,
-      position: user.position,
       role: user.role,
     };
   }
@@ -80,7 +78,6 @@ export class PrismaAuthRepository implements AuthRepository {
         firstName: user.firstName,
         lastName: user.lastName,
         middleName: user.middleName,
-        position: user.position,
         role: user.role,
       };
     } catch (error) {

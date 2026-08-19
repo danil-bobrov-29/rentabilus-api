@@ -43,7 +43,7 @@ export class AuthController {
   @ApiBadRequestResponse({ description: 'Некорректные данные запроса' })
   @ApiConflictResponse({ description: 'Пользователь уже существует' })
   @Post('register')
-  register(@Body() dto: RegisterDto): Promise<RegisterResult> {
+  async register(@Body() dto: RegisterDto): Promise<RegisterResult> {
     return this.registerUseCase.execute(dto);
   }
 
@@ -53,7 +53,7 @@ export class AuthController {
   @ApiUnauthorizedResponse({ description: 'Неверный email или пароль' })
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  login(@Body() dto: LoginDto): Promise<LoginResult> {
+  async login(@Body() dto: LoginDto): Promise<LoginResult> {
     return this.loginUseCase.execute(dto);
   }
 
@@ -63,7 +63,7 @@ export class AuthController {
   @ApiUnauthorizedResponse({ description: 'Токен отсутствует, недействителен или истёк' })
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  getCurrentUser(@CurrentUser() user: JwtRequestUser): Promise<PublicAuthUser> {
+  async getCurrentUser(@CurrentUser() user: JwtRequestUser): Promise<PublicAuthUser> {
     return this.getCurrentUserUseCase.execute(user.id);
   }
 }

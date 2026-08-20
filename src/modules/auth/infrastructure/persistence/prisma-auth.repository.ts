@@ -12,17 +12,16 @@ export class PrismaAuthRepository implements AuthRepository {
   async findByEmail(email: string): Promise<AuthUser | null> {
     const user = await this.prisma.user.findUnique({
       where: { email },
-      include: { credential: true },
     });
 
-    if (!user?.credential) {
+    if (!user) {
       return null;
     }
 
     return {
       id: user.id,
       email: user.email,
-      passwordHash: user.credential.passwordHash,
+      passwordHash: user.passwordHash,
       firstName: user.firstName,
       lastName: user.lastName,
       middleName: user.middleName,
@@ -33,17 +32,16 @@ export class PrismaAuthRepository implements AuthRepository {
   async findById(id: string): Promise<AuthUser | null> {
     const user = await this.prisma.user.findUnique({
       where: { id },
-      include: { credential: true },
     });
 
-    if (!user?.credential) {
+    if (!user) {
       return null;
     }
 
     return {
       id: user.id,
       email: user.email,
-      passwordHash: user.credential.passwordHash,
+      passwordHash: user.passwordHash,
       firstName: user.firstName,
       lastName: user.lastName,
       middleName: user.middleName,
@@ -60,21 +58,14 @@ export class PrismaAuthRepository implements AuthRepository {
           lastName: input.lastName,
           middleName: input.middleName,
           role: UserRole.USER,
-          credential: {
-            create: {
-              passwordHash: input.passwordHash,
-            },
-          },
-        },
-        include: {
-          credential: true,
+          passwordHash: input.passwordHash,
         },
       });
 
       return {
         id: user.id,
         email: user.email,
-        passwordHash: user.credential!.passwordHash,
+        passwordHash: user.passwordHash,
         firstName: user.firstName,
         lastName: user.lastName,
         middleName: user.middleName,
